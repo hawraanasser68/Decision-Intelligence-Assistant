@@ -1,0 +1,36 @@
+# Python environments — never commit these
+.venv/
+venv/
+env/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Secrets — never commit
+.env
+
+# Data files — large, not for git
+data/
+artifacts/chroma_db/
+artifacts/*.joblib
+artifacts/*.pkl
+
+# Logs
+logs/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# uv lock (optional — keep if you want reproducible builds)
+# uv.lock

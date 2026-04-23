@@ -1,0 +1,26 @@
+# Never bake the large Chroma vector index into the image
+# It is mounted as a bind volume at runtime via docker-compose.yml
+artifacts/chroma_db/
+# ML model is also bind-mounted at runtime
+artifacts/priority_model.joblib
+
+# Python caches
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+
+# Frontend (built separately in Dockerfile.frontend — not needed in backend image)
+frontend/
+
+# Data, scripts, and logs are only used locally, not at runtime
+data/
+scripts/
+logs/
+
+# Notebooks and docs
+*.ipynb
+*.pdf
+
+# Local env
+.env

@@ -1,0 +1,49 @@
+services:
+
+  # ── Backend (FastAPI + RAG + ML) ──────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: dia_backend
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      # Bind-mount the pre-built Chroma index from the host (avoids copying GBs into image)
+      - ./artifacts/chroma_db:/app/artifacts/chroma_db
+      # Bind-mount the trained ML model so it can be updated without rebuilding
+      - ./artifacts/priority_model.joblib:/app/artifacts/priority_model.joblib
+      - query_logs:/app/logs
+    networks:
+      - dia_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Frontend (React + nginx) ──────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: dia_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - dia_net
+    restart: unless-stopped
+
+# ── Named volumes ─────────────────────────────────────────────────────────
+volumes:
+  query_logs:
+
+# ── Shared network ─────────────────────────────────────────────────────────
+# Services talk to each other by name (backend, frontend) — not localhost.
+networks:
+  dia_net:
+    driver: bridge

@@ -1,0 +1,36 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies required by some Python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy dependency manifest first so Docker can cache this layer
+COPY pyproject.toml ./
+
+# Install uv (fast pip replacement) and project dependencies
+RUN pip install --no-cache-dir uv \
+    && uv pip install --system --no-cache \
+        fastapi \
+        uvicorn[standard] \
+        openai \
+        pydantic \
+        python-dotenv \
+        pandas \
+        scikit-learn \
+        joblib \
+        nltk \
+        chromadb
+
+# Download the VADER lexicon that ml_features.py needs
+RUN python -c "import nltk; nltk.download('vader_lexicon', quiet=True)"
+
+# Copy the rest of the project
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
